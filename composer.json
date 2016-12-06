@@ -1,0 +1,30 @@
+{
+  "name": "mimicreative/yii2-datatables",
+  "description": "Datatables Extension for Yii2",
+  "license": "Apache License",
+  "authors": [
+    {
+      "name": "MF Haqqi",
+      "email": "me@haqqi.net",
+      "homepage": "http://haqqi.net",
+      "role": "Developer"
+    }
+  ],
+  "keywords": ["yii2", "datatables", "plugin", "table", "jquery"],
+  "type": "yii2-extension",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "require": {
+    "php": ">=5.6.0",
+    "yiisoft/yii2": ">=2.0.0",
+    "datatables/datatables": ">=1.10.12"
+  },
+  "require-dev": {
+    "firephp/firephp-core": "dev-master"
+  },
+  "autoload": {
+    "psr-4": {
+      "mimicreative\\datatable\\": "src/"
+    }
+  }
+}
