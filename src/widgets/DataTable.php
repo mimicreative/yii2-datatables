@@ -101,6 +101,13 @@ class DataTable extends Widget {
   public function init() {
     parent::init();
     DataTableAsset::register($this->getView());
+
+    $assetConfig = \Yii::$container->get(DataTableAsset::className());
+
+    if($assetConfig->styling == DataTableAsset::STYLING_BOOTSTRAP) {
+      Html::addCssClass($this->tableOptions, ['table', 'table-striped', 'table-bordered']);
+    }
+
     $this->initColumns();
   }
 
