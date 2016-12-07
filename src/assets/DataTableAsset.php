@@ -22,7 +22,7 @@ class DataTableAsset extends AssetBundle {
   ];
 
   public $js = [
-    'jquery.dataTables.min.js'
+    'js/jquery.dataTables.min.js'
   ];
 
   public function init() {
