@@ -132,6 +132,7 @@ class DataTable extends Widget {
         if (isset($value['type'])) {
           if ($value['type'] == 'link') {
             $value['class'] = LinkColumn::className();
+            unset($value['type']);
           }
         }
         if (isset($value['class'])) {
