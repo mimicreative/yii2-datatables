@@ -25,19 +25,20 @@ class ActionsColumn extends Object {
           var links = jQuery("<div/>");
           
           for(var i = 0; i < data.length; i++) {
-            console.log(data[i]);
             var btnData = data[i];
             var link = jQuery("<a>" + btnData.label + "</a>");
             link.attr("href", btnData.url);
             link.addClass("btn " + btnData.class);
+            
+            if(btnData.options !== undefined) {
+              link.attr(btnData.options);
+            }
             
             links.append(link);
             links.append(" ");
           }
           
           if(type === "display") {
-            console.log(links);
-          
             return links.html();
           }
           
