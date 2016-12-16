@@ -41,6 +41,8 @@ class DataTableAction extends Action {
    * @var callable
    */
   public $applyFilter;
+  
+  public $extra;
 
   public function init() {
     if ($this->query === null) {
@@ -73,6 +75,7 @@ class DataTableAction extends Action {
         'recordsTotal'    => (int)$originalQuery->count(),
         'recordsFiltered' => (int)$dataProvider->getTotalCount(),
         'data'            => $filterQuery->all(),
+        'extra'           => $this->extra
       ];
     } catch (\Exception $e) {
       return ['error' => $e->getMessage()];
