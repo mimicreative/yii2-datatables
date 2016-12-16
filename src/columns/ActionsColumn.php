@@ -4,7 +4,6 @@ namespace mimicreative\datatables\columns;
 
 
 use yii\base\Object;
-use yii\helpers\Html;
 use yii\web\JsExpression;
 
 class ActionsColumn extends Object {
