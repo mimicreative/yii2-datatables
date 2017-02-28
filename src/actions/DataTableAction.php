@@ -13,6 +13,7 @@ use yii\base\Action;
 use yii\base\InvalidConfigException;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
+use yii\helpers\ArrayHelper;
 use yii\web\Response;
 
 /**
@@ -43,6 +44,8 @@ class DataTableAction extends Action {
   public $applyFilter;
   
   public $extra;
+  
+  public $toArrayProperties = [];
 
   public function init() {
     if ($this->query === null) {
@@ -74,7 +77,7 @@ class DataTableAction extends Action {
         'draw'            => (int)$draw,
         'recordsTotal'    => (int)$originalQuery->count(),
         'recordsFiltered' => (int)$dataProvider->getTotalCount(),
-        'data'            => $filterQuery->all(),
+        'data'            => ArrayHelper::toArray($filterQuery->all(), $this->toArrayProperties),
         'extra'           => $this->extra
       ];
     } catch (\Exception $e) {
