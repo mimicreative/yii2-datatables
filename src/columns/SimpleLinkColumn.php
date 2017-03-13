@@ -24,6 +24,8 @@ class SimpleLinkColumn extends Object {
   public $data;
   public $render;
   public $title;
+  public $searchable = false;
+  public $orderable = false;
 
   public function init() {
     $this->render = new JsExpression('
