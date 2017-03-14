@@ -38,7 +38,7 @@ use yii\helpers\Json;
  * @property array $ajax Load data for the table's content from an Ajax source
  * @property array $data Data to use as the display data for the table.
  * @property array $columnDefs Set column definition initialisation properties.
- * @property array $columns Set column specific initialisation properties.
+ * @property array|callable $columns Set column specific initialisation properties.
  * @property bool|int|array $deferLoading Delay the loading of server-side data until second draw
  * @property bool $destroy Destroy any existing table matching the selector and replace with the new options.
  * @property int $displayStart Initial paging start point
@@ -76,79 +76,90 @@ use yii\helpers\Json;
  * @property string $stateSaveCallback Callback that defines how the table state is stored and where.
  * @property string $stateSaveParams State save - data manipulation callback
  */
-class DataTable extends Widget {
+class DataTable extends Widget
+{
 
-  const COLUMN_TYPE_DATE         = 'date';
-  const COLUMN_TYPE_NUM          = 'num';
-  const COLUMN_TYPE_NUM_FMT      = 'num-fmt';
-  const COLUMN_TYPE_HTML_NUM     = 'html-num';
-  const COLUMN_TYPE_HTML_NUM_FMT = 'html-num-fmt';
-  const COLUMN_TYPE_STRING       = 'string';
+    const COLUMN_TYPE_DATE         = 'date';
+    const COLUMN_TYPE_NUM          = 'num';
+    const COLUMN_TYPE_NUM_FMT      = 'num-fmt';
+    const COLUMN_TYPE_HTML_NUM     = 'html-num';
+    const COLUMN_TYPE_HTML_NUM_FMT = 'html-num-fmt';
+    const COLUMN_TYPE_STRING       = 'string';
 
-  const PAGING_SIMPLE         = 'simple';
-  const PAGING_SIMPLE_NUMBERS = 'simple_numbers';
-  const PAGING_FULL           = 'full';
-  const PAGING_FULL_NUMBERS   = 'full_numbers';
+    const PAGING_SIMPLE         = 'simple';
+    const PAGING_SIMPLE_NUMBERS = 'simple_numbers';
+    const PAGING_FULL           = 'full';
+    const PAGING_FULL_NUMBERS   = 'full_numbers';
 
-  protected $_options = [];
+    protected $_options = [];
 
-  public $id;
-  /**
-   * @var array Html options for table
-   */
-  public $tableOptions = [];
+    public $id;
+    /**
+     * @var array Html options for table
+     */
+    public $tableOptions = [];
 
-  public function init() {
-    parent::init();
-    DataTableAsset::register($this->getView());
+    public function init()
+    {
+        parent::init();
+        DataTableAsset::register($this->getView());
 
-    $assetConfig = \Yii::$container->get(DataTableAsset::className());
+        $assetConfig = \Yii::$container->get(DataTableAsset::className());
 
-    if($assetConfig->styling == DataTableAsset::STYLING_BOOTSTRAP) {
-      Html::addCssClass($this->tableOptions, ['table', 'table-striped', 'table-bordered']);
+        if ($assetConfig->styling == DataTableAsset::STYLING_BOOTSTRAP) {
+            Html::addCssClass($this->tableOptions, ['table', 'table-striped', 'table-bordered']);
+        }
+
+        $this->initColumns();
     }
 
-    $this->initColumns();
-  }
+    public function run()
+    {
+        $id = isset($this->id) ? $this->id : $this->getId();
+        echo Html::beginTag('table', ArrayHelper::merge(['id' => $id], $this->tableOptions));
 
-  public function run() {
-    $id = isset($this->id) ? $this->id : $this->getId();
-    echo Html::beginTag('table', ArrayHelper::merge(['id' => $id], $this->tableOptions));
-
-    echo Html::endTag('table');
-    $this->getView()->registerJs('jQuery("#' . $id . '").DataTable(' . Json::encode($this->getParams()) . ');');
-  }
-
-  protected function getParams() {
-    return $this->_options;
-  }
-
-  protected function initColumns() {
-    if (isset($this->_options['columns'])) {
-      foreach ($this->_options['columns'] as $key => $value) {
-        if (is_string($value)) {
-          $this->_options['columns'][$key] = ['data' => $value, 'title' => Inflector::camel2words($value)];
-        }
-        if (isset($value['type'])) {
-          if ($value['type'] == 'link') {
-            $value['class'] = LinkColumn::className();
-            unset($value['type']);
-          }
-        }
-        if (isset($value['class'])) {
-          $column                          = \Yii::createObject($value);
-          $this->_options['columns'][$key] = $column;
-        }
-      }
+        echo Html::endTag('table');
+        $this->getView()->registerJs('jQuery("#' . $id . '").DataTable(' . Json::encode($this->getParams()) . ');');
     }
-  }
 
-  public function __set($name, $value) {
-    return $this->_options[$name] = $value;
-  }
+    protected function getParams()
+    {
+        return $this->_options;
+    }
 
-  public function __get($name) {
-    return isset($this->_options[$name]) ? $this->_options[$name] : null;
-  }
+    protected function initColumns()
+    {
+        if (isset($this->_options['columns'])) {
+            // adjust the variable for callable function
+            if (is_callable($this->_options['columns'])) {
+                $this->_options['columns'] = call_user_func($this->_options['columns']);
+            }
 
+            foreach ($this->_options['columns'] as $key => $value) {
+                if (is_string($value)) {
+                    $this->_options['columns'][$key] = ['data' => $value, 'title' => Inflector::camel2words($value)];
+                }
+                if (isset($value['type'])) {
+                    if ($value['type'] == 'link') {
+                        $value['class'] = LinkColumn::className();
+                        unset($value['type']);
+                    }
+                }
+                if (isset($value['class'])) {
+                    $column                          = \Yii::createObject($value);
+                    $this->_options['columns'][$key] = $column;
+                }
+            }
+        }
+    }
+
+    public function __set($name, $value)
+    {
+        return $this->_options[$name] = $value;
+    }
+
+    public function __get($name)
+    {
+        return isset($this->_options[$name]) ? $this->_options[$name] : null;
+    }
 }
