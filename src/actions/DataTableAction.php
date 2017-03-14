@@ -24,7 +24,7 @@ use yii\web\Response;
 class DataTableAction extends Action
 {
     /**
-     * @var ActiveQuery
+     * @var ActiveQuery|callable
      */
     public $query;
 
@@ -65,7 +65,11 @@ class DataTableAction extends Action
         }
 
         /** @var ActiveQuery $originalQuery */
-        $originalQuery      = $this->query;
+        if (is_callable($this->query)) {
+            $originalQuery = call_user_func($this->query);
+        } else {
+            $originalQuery = $this->query;
+        }
         $filterQuery        = clone $originalQuery;
         $draw               = Yii::$app->request->getQueryParam('draw');
         $filterQuery->where = null;
