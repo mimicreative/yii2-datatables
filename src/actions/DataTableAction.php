@@ -60,6 +60,10 @@ class DataTableAction extends Action
 
     public function run()
     {
+        if($this->canAccess instanceof \Closure) {
+            $this->canAccess = ($this->canAccess)();
+        }
+        
         if (!$this->canAccess) {
             throw new NotFoundHttpException();
         }
