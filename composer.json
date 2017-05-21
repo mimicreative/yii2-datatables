@@ -19,9 +19,6 @@
     "yiisoft/yii2": ">=2.0.0",
     "datatables/datatables": ">=1.10.12"
   },
-  "require-dev": {
-    "firephp/firephp-core": "dev-master"
-  },
   "autoload": {
     "psr-4": {
       "mimicreative\\datatables\\": "src/"
