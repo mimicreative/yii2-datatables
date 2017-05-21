@@ -31,7 +31,7 @@ class DataTable extends Widget
      * @var array Options to be passed to datatables configuration, using json encode.
      * @see datatables.net
      */
-    public $datatableOptions = [];
+    public $dataTable = [];
 
     public function init()
     {
@@ -50,12 +50,12 @@ class DataTable extends Widget
     public function run()
     {
         echo Html::endTag('table');
-        $this->getView()->registerJs('jQuery("#' . $this->tableOptions['id'] . '").DataTable(' . Json::encode($this->datatableOptions) . ');');
+        $this->getView()->registerJs('jQuery("#' . $this->tableOptions['id'] . '").DataTable(' . Json::encode($this->dataTable) . ');');
     }
 
     protected function initColumns()
     {
-        $dataTable =& $this->datatableOptions;
+        $dataTable =& $this->dataTable;
 
         if (isset($dataTable['columns'])) {
             // adjust the variable for callable function
