@@ -2,11 +2,14 @@
 
 namespace mimicreative\datatables\widgets;
 
+use mimicreative\datatables\assets\DataTableAsset;
 use mimicreative\datatables\columns\LinkColumn;
 use yii\base\Widget;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Inflector;
 use yii\helpers\Json;
+use yii\web\AssetBundle;
 
 /**
  * Class DataTable
@@ -33,6 +36,8 @@ class DataTable extends Widget
     public function init()
     {
         parent::init();
+        
+        DataTableAsset::register($this->view);
 
         //the table id must be set
         if (!isset($this->tableOptions['id'])) {
