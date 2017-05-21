@@ -43,8 +43,19 @@ class DataTable extends Widget
         if (!isset($this->tableOptions['id'])) {
             $this->tableOptions['id'] = 'dt-' . $this->getId();
         }
+        
+        $this->initColumns();
+        
+        $defaultTableOptions = [
+            'class' => [
+                'table',
+                'table-striped',
+                'table-bordered',
+                'table-hover'
+            ]
+        ];
 
-        echo Html::beginTag('table', $this->tableOptions);
+        echo Html::beginTag('table', ArrayHelper::merge($defaultTableOptions, $this->tableOptions));
     }
 
     public function run()
