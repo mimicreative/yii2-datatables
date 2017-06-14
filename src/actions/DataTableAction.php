@@ -75,23 +75,23 @@ class DataTableAction extends Action
             $originalQuery = $this->query;
         }
         $filterQuery        = clone $originalQuery;
-        $draw               = Yii::$app->request->getQueryParam('draw');
+        $draw               = Yii::$app->request->getBodyParam('draw');
         $filterQuery->where = null;
-        $search             = Yii::$app->request->getQueryParam('search', ['value' => null, 'regex' => false]);
-        $columns            = Yii::$app->request->getQueryParam('columns', []);
-        $order              = Yii::$app->request->getQueryParam('order', []);
+        $search             = Yii::$app->request->getBodyParam('search', ['value' => null, 'regex' => false]);
+        $columns            = Yii::$app->request->getBodyParam('columns', []);
+        $order              = Yii::$app->request->getBodyParam('order', []);
         $filterQuery        = $this->applyFilter($filterQuery, $columns, $search);
         $filterQuery        = $this->applyOrder($filterQuery, $columns, $order);
         if (!empty($originalQuery->where)) {
             $filterQuery->andWhere($originalQuery->where);
         }
         $filterQuery
-            ->offset(Yii::$app->request->getQueryParam('start', 0))
-            ->limit(Yii::$app->request->getQueryParam('length', -1));
+            ->offset(Yii::$app->request->getBodyParam('start', 0))
+            ->limit(Yii::$app->request->getBodyParam('length', -1));
         $dataProvider               = new ActiveDataProvider([
             'query'      => $filterQuery,
             'pagination' => [
-                'pageSize' => Yii::$app->request->getQueryParam('length', 10)
+                'pageSize' => Yii::$app->request->getBodyParam('length', 10)
             ]
         ]);
         Yii::$app->response->format = Response::FORMAT_JSON;
