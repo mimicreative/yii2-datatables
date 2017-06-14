@@ -24,6 +24,18 @@ use yii\web\Response;
 class DataTableAction extends Action
 {
     /**
+     * Types of request method
+     */
+    const REQUEST_METHOD_GET = 'GET';
+    const REQUEST_METHOD_POST = 'POST';
+
+    /**
+     * @see \nullref\datatable\DataTableAction::getParam
+     * @var string
+     */
+    public $requestMethod = self::REQUEST_METHOD_GET;
+
+    /**
      * @var ActiveQuery|callable
      */
     public $query;
@@ -58,6 +70,19 @@ class DataTableAction extends Action
         }
     }
 
+    /**
+     * Extract param from request
+     * @param $name
+     * @param null $defaultValue
+     * @return mixed
+     */
+    protected function getParam($name, $defaultValue = null)
+    {
+        return $this->requestMethod == self::REQUEST_METHOD_GET ?
+            Yii::$app->request->getQueryParam($name, $defaultValue) :
+            Yii::$app->request->getBodyParam($name, $defaultValue);
+    }
+
     public function run()
     {
         if($this->canAccess instanceof \Closure) {
@@ -75,23 +100,23 @@ class DataTableAction extends Action
             $originalQuery = $this->query;
         }
         $filterQuery        = clone $originalQuery;
-        $draw               = Yii::$app->request->getBodyParam('draw');
+        $draw               = $this->getParam('draw');
         $filterQuery->where = null;
-        $search             = Yii::$app->request->getBodyParam('search', ['value' => null, 'regex' => false]);
-        $columns            = Yii::$app->request->getBodyParam('columns', []);
-        $order              = Yii::$app->request->getBodyParam('order', []);
+        $search             = $this->getParam('search', ['value' => null, 'regex' => false]);
+        $columns            = $this->getParam('columns', []);
+        $order              = $this->getParam('order', []);
         $filterQuery        = $this->applyFilter($filterQuery, $columns, $search);
         $filterQuery        = $this->applyOrder($filterQuery, $columns, $order);
         if (!empty($originalQuery->where)) {
             $filterQuery->andWhere($originalQuery->where);
         }
         $filterQuery
-            ->offset(Yii::$app->request->getBodyParam('start', 0))
-            ->limit(Yii::$app->request->getBodyParam('length', -1));
+            ->offset($this->getParam('start', 0))
+            ->limit($this->getParam('length', -1));
         $dataProvider               = new ActiveDataProvider([
             'query'      => $filterQuery,
             'pagination' => [
-                'pageSize' => Yii::$app->request->getBodyParam('length', 10)
+                'pageSize' => $this->getParam('length', 10)
             ]
         ]);
         Yii::$app->response->format = Response::FORMAT_JSON;
