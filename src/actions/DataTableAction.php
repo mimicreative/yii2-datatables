@@ -156,7 +156,12 @@ class DataTableAction extends Action
         foreach ($columns as $column) {
             if ($column['searchable'] == 'true' && array_key_exists($column['data'], $schema) !== false) {
                 $value = empty($search['value']) ? $column['search']['value'] : $search['value'];
-                $query->orFilterWhere(['like', $tableName . "." . $column['data'], $value]);
+                $field = $column['data'];
+                if (strpos($column['data'], ".") === false) {
+                    $field = $tableName . "." . $column['data'];
+                }
+
+                $query->orFilterWhere(['like', $field, $value]);
             }
         }
 
