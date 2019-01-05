@@ -47,6 +47,15 @@ class DataTableAction extends Action
      * @var  callable
      */
     public $applyOrder;
+    
+    /**
+     * By enabling this, searching feature will grab any
+     * fields that writen on data but if this turned off
+     * we will only search existing field on own table
+     *
+     * @var boolean
+     */
+    public $searchEveryField = false;
 
     /**
      * Applies filtering according to params from DataTable
@@ -148,23 +157,27 @@ class DataTableAction extends Action
         if ($this->applyFilter !== null) {
             return call_user_func($this->applyFilter, $query, $columns, $search);
         }
-
+        
         /** @var \yii\db\ActiveRecord $modelClass */
-        $modelClass = $query->modelClass;
-        $tableName  = $modelClass::tableName();
-        $schema     = $modelClass::getTableSchema()->columns;
+        $modelClass  = $query->modelClass;
+        $tableName   = $modelClass::tableName();
+        $tableColumn = $modelClass::getTableSchema()->columnNames;
         foreach ($columns as $column) {
-            if ($column['searchable'] == 'true' && array_key_exists($column['data'], $schema) !== false) {
+            $specialCond = (
+                (!$this->searchEveryField and in_array($column['data'], $tableColumn))
+                or ($this->searchEveryField and $column['data'] != "")
+            );
+            if ($column['searchable'] == 'true' and $specialCond) {
                 $value = empty($search['value']) ? $column['search']['value'] : $search['value'];
                 $field = $column['data'];
                 if (strpos($column['data'], ".") === false) {
                     $field = $tableName . "." . $column['data'];
                 }
-
+                
                 $query->orFilterWhere(['like', $field, $value]);
             }
         }
-
+        
         return $query;
     }
 
