@@ -151,11 +151,12 @@ class DataTableAction extends Action
 
         /** @var \yii\db\ActiveRecord $modelClass */
         $modelClass = $query->modelClass;
+        $tableName  = $modelClass::tableName();
         $schema     = $modelClass::getTableSchema()->columns;
         foreach ($columns as $column) {
             if ($column['searchable'] == 'true' && array_key_exists($column['data'], $schema) !== false) {
                 $value = empty($search['value']) ? $column['search']['value'] : $search['value'];
-                $query->orFilterWhere(['like', $column['data'], $value]);
+                $query->orFilterWhere(['like', $tableName . "." . $column['data'], $value]);
             }
         }
 
