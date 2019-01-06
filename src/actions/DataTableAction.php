@@ -24,6 +24,18 @@ use yii\web\Response;
 class DataTableAction extends Action
 {
     /**
+     * Types of request method
+     */
+    const REQUEST_METHOD_GET = 'GET';
+    const REQUEST_METHOD_POST = 'POST';
+
+    /**
+     * @see \nullref\datatable\DataTableAction::getParam
+     * @var string
+     */
+    public $requestMethod = self::REQUEST_METHOD_GET;
+
+    /**
      * @var ActiveQuery|callable
      */
     public $query;
@@ -35,6 +47,15 @@ class DataTableAction extends Action
      * @var  callable
      */
     public $applyOrder;
+    
+    /**
+     * By enabling this, searching feature will grab any
+     * fields that writen on data but if this turned off
+     * we will only search existing field on own table
+     *
+     * @var boolean
+     */
+    public $searchEveryField = false;
 
     /**
      * Applies filtering according to params from DataTable
@@ -58,6 +79,19 @@ class DataTableAction extends Action
         }
     }
 
+    /**
+     * Extract param from request
+     * @param $name
+     * @param null $defaultValue
+     * @return mixed
+     */
+    protected function getParam($name, $defaultValue = null)
+    {
+        return $this->requestMethod == self::REQUEST_METHOD_GET ?
+            Yii::$app->request->getQueryParam($name, $defaultValue) :
+            Yii::$app->request->getBodyParam($name, $defaultValue);
+    }
+
     public function run()
     {
         if($this->canAccess instanceof \Closure) {
@@ -75,23 +109,23 @@ class DataTableAction extends Action
             $originalQuery = $this->query;
         }
         $filterQuery        = clone $originalQuery;
-        $draw               = Yii::$app->request->getQueryParam('draw');
+        $draw               = $this->getParam('draw');
         $filterQuery->where = null;
-        $search             = Yii::$app->request->getQueryParam('search', ['value' => null, 'regex' => false]);
-        $columns            = Yii::$app->request->getQueryParam('columns', []);
-        $order              = Yii::$app->request->getQueryParam('order', []);
+        $search             = $this->getParam('search', ['value' => null, 'regex' => false]);
+        $columns            = $this->getParam('columns', []);
+        $order              = $this->getParam('order', []);
         $filterQuery        = $this->applyFilter($filterQuery, $columns, $search);
         $filterQuery        = $this->applyOrder($filterQuery, $columns, $order);
         if (!empty($originalQuery->where)) {
             $filterQuery->andWhere($originalQuery->where);
         }
         $filterQuery
-            ->offset(Yii::$app->request->getQueryParam('start', 0))
-            ->limit(Yii::$app->request->getQueryParam('length', -1));
+            ->offset($this->getParam('start', 0))
+            ->limit($this->getParam('length', -1));
         $dataProvider               = new ActiveDataProvider([
             'query'      => $filterQuery,
             'pagination' => [
-                'pageSize' => Yii::$app->request->getQueryParam('length', 10)
+                'pageSize' => $this->getParam('length', 10)
             ]
         ]);
         Yii::$app->response->format = Response::FORMAT_JSON;
@@ -123,17 +157,27 @@ class DataTableAction extends Action
         if ($this->applyFilter !== null) {
             return call_user_func($this->applyFilter, $query, $columns, $search);
         }
-
+        
         /** @var \yii\db\ActiveRecord $modelClass */
-        $modelClass = $query->modelClass;
-        $schema     = $modelClass::getTableSchema()->columns;
+        $modelClass  = $query->modelClass;
+        $tableName   = $modelClass::tableName();
+        $tableColumn = $modelClass::getTableSchema()->columnNames;
         foreach ($columns as $column) {
-            if ($column['searchable'] == 'true' && array_key_exists($column['data'], $schema) !== false) {
+            $specialCond = (
+                (!$this->searchEveryField and in_array($column['data'], $tableColumn))
+                or ($this->searchEveryField and $column['data'] != "")
+            );
+            if ($column['searchable'] == 'true' and $specialCond) {
                 $value = empty($search['value']) ? $column['search']['value'] : $search['value'];
-                $query->orFilterWhere(['like', $column['data'], $value]);
+                $field = $column['data'];
+                if (strpos($column['data'], ".") === false) {
+                    $field = $tableName . "." . $column['data'];
+                }
+                
+                $query->orFilterWhere(['like', $field, $value]);
             }
         }
-
+        
         return $query;
     }
 

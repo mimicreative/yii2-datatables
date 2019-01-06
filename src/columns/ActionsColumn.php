@@ -3,10 +3,10 @@
 namespace mimicreative\datatables\columns;
 
 
-use yii\base\Object;
+use yii\base\BaseObject;
 use yii\web\JsExpression;
 
-class ActionsColumn extends Object {
+class ActionsColumn extends BaseObject {
 
   public $searchable = false;
   public $orderable  = false;

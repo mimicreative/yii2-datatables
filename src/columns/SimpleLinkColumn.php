@@ -2,7 +2,7 @@
 
 namespace mimicreative\datatables\columns;
 
-use yii\base\Object;
+use yii\base\BaseObject;
 use yii\web\JsExpression;
 
 /**
@@ -20,7 +20,7 @@ use yii\web\JsExpression;
  * @package mimicreative\datatables\columns
  * @author Haqqi <me@haqqi.net>
  */
-class SimpleLinkColumn extends Object {
+class SimpleLinkColumn extends BaseObject {
   public $data;
   public $render;
   public $title;
