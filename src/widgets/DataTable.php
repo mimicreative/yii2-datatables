@@ -10,6 +10,7 @@ use yii\helpers\Html;
 use yii\helpers\Inflector;
 use yii\helpers\Json;
 use yii\web\AssetBundle;
+use yii\base\InvalidParamException;
 
 /**
  * Class DataTable
@@ -21,6 +22,11 @@ use yii\web\AssetBundle;
  */
 class DataTable extends Widget
 {
+    /**
+     * @var class DataTable asset that control plugin for this widget
+     */
+    public $asset = DataTableAsset::class;
+
     /**
      * @var array Html options for table
      * @see Html::renderTagAttributes() for better understanding
@@ -37,7 +43,12 @@ class DataTable extends Widget
     {
         parent::init();
         
-        DataTableAsset::register($this->view);
+        $dtAsset = $this->asset;
+        if (!($dtAsset instanceof AssetBundle)) {
+            throw new InvalidParamException("Invalid Asset Bundle");
+        }
+
+        $dtAsset::register($this->view);
 
         //the table id must be set
         if (!isset($this->tableOptions['id'])) {
