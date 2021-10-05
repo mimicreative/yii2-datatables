@@ -42,8 +42,8 @@ class DataTable extends Widget
     public function init()
     {
         parent::init();
-        
-        $dtAsset = $this->asset;
+
+        $dtAsset = new $this->asset;
         if (!($dtAsset instanceof AssetBundle)) {
             throw new InvalidParamException("Invalid Asset Bundle");
         }
@@ -54,9 +54,9 @@ class DataTable extends Widget
         if (!isset($this->tableOptions['id'])) {
             $this->tableOptions['id'] = 'dt-' . $this->getId();
         }
-        
+
         $this->initColumns();
-        
+
         $defaultTableOptions = [
             'class' => [
                 'table',
